@@ -46,7 +46,7 @@ Response
 Params:
 - `lon`, `lat` - user coordinates
 - `max_price`[optional] - max possible price for scooter driving per hour
-- `limit`[optional] - max possible amount of nearest scooters in response
+- `limit`[optional] - max possible amount of the nearest scooters in response
 
 Response
 - 200 - OK
@@ -59,7 +59,7 @@ Response
       "scooter_id": 1,
       "lon": 1,
       "lat": 0,
-      "price": "1$/hour"
+      "price": 5
     }
   ],
   "_links": {
@@ -79,7 +79,7 @@ Params
 
 Response
 - 204 - No Content - Success.
-- 409 - Conflict - If the scooter already locked.
+- 409 - Conflict - If the scooter has already been locked.
 
 <br/>Response body example
 ```json
@@ -109,7 +109,7 @@ Response
 
 
 **GET** `/vehicles`
-</br>Gets all available scootres in the app.
+</br>Gets all available scooters in the app.
 
 Response
 - 200 - OK
@@ -120,15 +120,15 @@ Response
   "vehicles": [
     {
       "scooter_id": 1009,
-      "lon": 10,
-      "lat": 120,
-      "price": "1$/hour"
+      "lon": 50,
+      "lat": 40,
+      "price": 1
     },
     {
       "scooter_id": 1008,
-      "lon": 200,
-      "lat": 500,
-      "price": "1$/hour"
+      "lon": 22,
+      "lat": 12,
+      "price": 1
     }
   ]
 }
