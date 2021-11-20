@@ -5,8 +5,7 @@ Web-service with RESTful API that allows user to aggregate information about sco
 
 ## User-to-Aggregator API
 
-
-**GET** `/scooters` 
+**GET** `/api` 
 
 Response
 - 200 OK
@@ -15,33 +14,58 @@ Response
 ```json
 {
   "_links": {
-    "self": { "href": "/scooters" },
-    "new_client": { "href": "/scooters/new_client" },
-    "nearest": { "href": "/scooters/nearest" }
+    "clients": { "href": "/clients" },
+    "scooters": { "href": "/scooters" }
   }
 }
 ```
 
-**GET** `/scooters/new_client`
-</br>Get client id.
+
+**POST** `/clients`
+</br>Register new client.
 
 Response
-- 200 - OK
+- 201 - Created.
 
 <br/>Response body example
 ```json
 {
-   "client_id": 100200300,
+   "uuid": 100200300,
+   "_links": {
+     "self": { "href": "/clients" }
+   }
+}
+```
+
+
+**GET** `/scooters` 
+</br>Gets all available scooters.
+
+Response
+- 200 OK
+
+<br/>Response body example
+```json
+{
+  "scooters": [
+    {
+      "scooter_id": 1,
+      "lon": 1,
+      "lat": 0,
+      "price": 5
+    }
+  ],
   "_links": {
     "self": { "href": "/scooters" },
-    "new_client": { "href": "/scooters/new_client" },
-    "nearest": { "href": "/scooters/nearest" }
+    "nearest": { "href": "/scooters/nearest" },
+    "book": { "href": "/scooters/{id}/reservations" },
+    "unbook": { "href": "/scooters/{id}/reservations" }
   }
 }
 ```
 
 **GET** `/scooters/nearest`
-</br>Get nearest scooters.
+</br>Gets nearest available scooters.
 
 Params:
 - `lon`, `lat` - user coordinates
@@ -64,18 +88,17 @@ Response
   ],
   "_links": {
     "self": { "href": "/scooters/nearest" },
-    "book": { "href": "/scooters/book" },
-    "unbook": { "href": "/scooters/unbook" }
+    "book": { "href": "/scooters/{id}/reservations" },
+    "unbook": { "href": "/scooters/{id}/reservations" }
   }
 }
 ```
 
-**PUT** `/scooters/book`
+**POST** `/scooters/{id}/reservations`
 </br>Ask to book the scooter in the 3d party app.
 
 Params
 - `uuid` - client id
-- `scooter_id`
 
 Response
 - 204 - No Content - Success.
@@ -86,18 +109,18 @@ Response
 {  "message": "This scooter has already been locked." }
 ```
 
-**PUT** `/scooters/unbook`
+**DELETE** `/scooters/{id}/reservations`
 </br>Ask to unbook the scooter in the 3d party app.
 
 Params
 - `uuid` - client id
-- `scooter_id`
 
 Response
 - 204 - No Content - Success.
 
 ### Supported HTTP Status Codes:
 <br/>**200 OK** Successful request.
+<br/>**201 Created**
 <br/>**204 No Content** The server has fulfilled the request but does not need to return an entity-body.
 <br/>**400 Bad Request** Wrong URI or JSON representation of data.
 <br/>**404 Not found** The requested resource could not be found.
@@ -133,14 +156,12 @@ Response
   ]
 }
 ```
-**PUT** `/vehicles/book`
+**POST** `/vehicles/{id}/reservations`
 
 Parameters
-- scooter_id
 - uuid - client id
 
-**PUT** `/vehicles/unbook`
+**DELETE** `/vehicles/{id}/reservations`
 
 Parameters
-- scooter_id
 - uuid - client id
