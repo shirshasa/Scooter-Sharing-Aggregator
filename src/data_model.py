@@ -5,7 +5,7 @@ from geopy.distance import geodesic
 class Scooter:
     def __init__(self, data):
         lon, lat = data.get('lon', ''), data.get('lat', '')
-        self.position = parse_coordinate(lon), parse_coordinate(lat)
+        self.position = parse_float(lon), parse_float(lat)
         self.price = data.get('price')
         self.scooter_id = data.get('scooter_id')
 
