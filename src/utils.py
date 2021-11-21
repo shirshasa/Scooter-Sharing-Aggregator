@@ -1,7 +1,5 @@
-APP_ID2URL = {
-  '1': 'http://1.by',
-  '2': 'http://2.by'
-}
+import requests
+
 
 class ParseError(RuntimeError):
   pass
@@ -30,17 +28,8 @@ def parse_scooter_id(composed_scooter_id):
 
 
 def get_vehicles(url):
-    return [
-        {
-            "scooter_id": '1009',
-            "lon": 10,
-            "lat": 40,
-            "price": 1
-        },
-        {
-            "scooter_id": '1008',
-            "lon": 20,
-            "lat": 55,
-            "price": 1
-        }
-    ]
+    route = f'/vehicles'
+    response = requests.get(f"{url}{route}")
+    data = response.json()
+    print(data)
+    return data['vehicles']
