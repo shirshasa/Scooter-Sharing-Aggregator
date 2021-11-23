@@ -7,42 +7,50 @@ from data_model import Scooter
 from flask import Flask
 from flask import request, abort
 from flask_caching import Cache
+from flask_pymongo import PyMongo
 
 
-config = {
-    "DEBUG": False,
-    "CACHE_TYPE": "SimpleCache",
-}
 app = Flask(__name__)
-app.config.from_mapping(config)
+app.config.from_pyfile('../config/config.py')
 cache = Cache(app)
 cache.set('APP_ID2URL', json.load(open('../config/app_info.json', 'r')))
-cache.set('uuid_db', [])
+db = PyMongo(app).db
 
 
 @cache.cached(timeout=60, key_prefix='all_scooters')
 def get_all_scooters():
     scooters = []
-    print(cache.get('APP_ID2URL'))
-    for app_id, app_url in cache.get('APP_ID2URL').items():
-        app_scooters = get_vehicles(app_url)
-        for scooter in app_scooters:
-            scooter['scooter_id'] = f"{app_id}/{scooter['scooter_id']}"
-            scooters.append(scooter)
-    scooters: list[Scooter] = [Scooter(data) for data in scooters]
+    try:
+        for app_id, app_url in cache.get('APP_ID2URL').items():
+            app_scooters = get_vehicles(app_url)
+            for scooter in app_scooters:
+                scooter['scooter_id'] = f"{app_id}-{scooter['scooter_id']}"
+                scooters.append(scooter)
+        scooters: list[Scooter] = [Scooter(data) for data in scooters]
+    except ExternalAppError:
+        abort(500)
     return scooters
 
 
-@app.route("/")
+@app.route("/api")
 def hello():
-    param_id = request.args.get('id', '')
-    return "Hello World!" + str(param_id) + '\n'
+    return {
+        "_links": {
+            "clients": {"href": "/clients"},
+            "scooters": {"href": "/scooters"}
+        }
+    }
 
 
 @app.route("/clients")
 def new_client():
-    new_id = {"uuid": str(uuid4())}
-    return new_id
+    client_response = {
+        "uuid": str(uuid4()),
+        "_links": {
+            "self": {"href": "/clients"}
+        }}
+    add_client(db, client_response['uuid'])  # todo: handle failure
+    return client_response
 
 
 @app.route("/scooters")
@@ -104,11 +112,14 @@ def get_nearest():
 @app.route("/scooters/<scooter_id>/reservations", methods=['POST', 'DELETE'])
 def reservation(scooter_id):
     cur_uuid = request.args.get('uuid', '')
-    # todo check cur_uuid in db
+    if cur_uuid == '':
+        abort(400, 'No uuid specified.')
+    db.clients.find_one_or_404({'uuid': cur_uuid})
+
     try:
         app_id, scooter_id = parse_scooter_id(scooter_id)
         if app_id not in cache.get('APP_ID2URL'):
-            abort(400)
+            abort(400, 'Wrong scooter_id.')
         url = cache.get('APP_ID2URL')[app_id]
         route = f'/vehicles/{scooter_id}/reservations'
 
@@ -119,7 +130,7 @@ def reservation(scooter_id):
         return '', app_response.status_code
 
     except ParseError:
-        abort(400)
+        abort(400, 'Wrong scooter id.')
 
 
 if __name__ == "__main__":
