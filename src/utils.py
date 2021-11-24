@@ -36,7 +36,6 @@ def get_vehicles(url):
     response = requests.get(f"{url}{route}")
     if response.status_code == 200:
         data = response.json()
-        print(data)
         return data['vehicles']
     else:
         raise ExternalAppError()
