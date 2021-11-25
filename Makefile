@@ -9,9 +9,9 @@ activate_venv: requirements.txt
 	./venv/bin/pip install -r requirements.txt
 
 run1: venv/bin/activate
-	./venv/bin/python3 src/tmp2.py 5050
+	./venv/bin/python3 src/__init__.py 5050
 run2: venv/bin/activate
-	./venv/bin/python3 src/tmp2.py 5000
+	./venv/bin/python3 src/__init__.py 5000
 
 clean:
 	rm -rf venv
