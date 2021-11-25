@@ -1,5 +1,6 @@
 import json
-import requests
+import os, sys
+import logging
 
 from uuid import uuid4
 from utils import *
@@ -11,13 +12,21 @@ from flask_pymongo import PyMongo
 
 
 app = Flask(__name__)
+app.logger.disabled = True
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+log.disabled = True
+
 app.config.from_pyfile('../config/config.py')
 cache = Cache(app)
-cache.set('APP_ID2URL', json.load(open('../config/app_info.json', 'r')))
-db = PyMongo(app).db
+
+file_path = f"{os.environ.get('PROJECT_PATH')}/config/app_info.json".replace('\"', '')  # magic with quotes
+app.config['MONGO_URI'] = os.environ.get('MONGO_CONNECTION_STR').replace('\"', '')
+cache.set('APP_ID2URL', json.load(open(file_path, 'r')))
+db = PyMongo(app, ssl=True).db
 
 
-@cache.cached(timeout=60, key_prefix='all_scooters')
+@cache.cached(timeout=65, key_prefix='all_scooters')
 def get_all_scooters():
     scooters = []
     try:
@@ -28,7 +37,7 @@ def get_all_scooters():
                 scooters.append(scooter)
         scooters: list[Scooter] = [Scooter(data) for data in scooters]
     except ExternalAppError:
-        abort(500)
+        abort(503, 'Scooter service is unavailable')
     return scooters
 
 
@@ -134,4 +143,5 @@ def reservation(scooter_id):
 
 
 if __name__ == "__main__":
-    app.run(port=5000)
+    port = int(sys.argv[1]) if len(sys.argv) > 1 else 5000
+    app.run(port=port)
