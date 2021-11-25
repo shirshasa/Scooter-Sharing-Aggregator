@@ -3,7 +3,7 @@
 Web-service with RESTful API that allows user to aggregate information about scooters among different scooter sharing apps. It also allows to book and unbook preferred scooter.
 
 ## Local test run
-####Aggregator:
+#### Aggregator:
 
 prerequisites: setup nginx, in upstream section list ports where aggregator will be listening.
 Example of  config in `config/nginx.config`
@@ -15,10 +15,10 @@ For MongoDB connection:
 - also specify database by adding `/db_name` to this uri string
 - add options `?retryWrites=true&w=majority&r=majority`
 
-####Scooter-service
+#### Scooter-service
 
 - create config.py and add MONGO_URI variable- mongoDB connection string
-- for db creation see `scooters_app/database.py`
+- for db creation see `scooters_app/create_scootersharing_db.py`
 ## User-to-Aggregator API
 
 **GET** `/api` 
